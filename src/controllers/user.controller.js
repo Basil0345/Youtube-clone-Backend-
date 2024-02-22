@@ -143,7 +143,8 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
     // req.user -> comming from auth validator middleware (jwtVerify)
     //clear refresh token in db
-    let test = await User.findByIdAndUpdate(
+    //clear cookie from frontend
+    await User.findByIdAndUpdate(
         req.user._id,
         {
             $unset: {
@@ -167,7 +168,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
-    
+
     if (!incomingRefreshToken) {
         throw new ApiError(401, "unauthorized request")
     }
