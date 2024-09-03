@@ -36,6 +36,6 @@ const videoSchema = new Schema({
     }
 }, { timeseries: true });
 
-videoSchema.plugin(mongooseAggregatePaginate)  //aggragation pipeline plugin 
+videoSchema.plugin(mongooseAggregatePaginate)  //aggragation pipeline plugin for pagination
 
 export const Video = mongoose.model("Video", videoSchema);

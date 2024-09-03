@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { deleteFileOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
+import { cleanUpFiles, deleteFileOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import fs from "fs";
 import jwt from 'jsonwebtoken';
@@ -31,16 +31,15 @@ const registerUser = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.files?.avatar?.[0]?.path || "";
     const coverImageLocalPath = req.files?.coverImage?.[0]?.path || "";
 
-    //validation - not empty
+    //validation - fields 
     if (!username || !email || !password || !fullName) {
+        cleanUpFiles([avatarLocalPath, coverImageLocalPath]);
         throw new ApiError(400, "All fields are required")
     }
 
     //check for images, check for avatar
     if (!avatarLocalPath) {
-        if (coverImageLocalPath) {
-            fs.unlinkSync(coverImageLocalPath);
-        }
+        cleanUpFiles([coverImageLocalPath]);
         throw new ApiError(400, "Avatar file is required");
     }
 
@@ -50,10 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     if (existedUser) {
-        fs.unlinkSync(avatarLocalPath)
-        if (coverImageLocalPath) {
-            fs.unlinkSync(coverImageLocalPath)
-        }
+        cleanUpFiles([avatarLocalPath, coverImageLocalPath]);
         throw new ApiError(409, "User with email or username already exists");
     }
 

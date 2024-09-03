@@ -7,6 +7,19 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Utility function to clean up files
+const cleanUpFiles = (filePaths) => {
+    filePaths.forEach(filePath => {
+        if (filePath) {
+            try {
+                fs.unlinkSync(filePath);
+            } catch (error) {
+                console.error(`Error removing file: ${filePath}`, error);
+            }
+        }
+    });
+};
+
 const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return null;
@@ -42,4 +55,4 @@ const deleteFileOnCloudinary = async (fileUrl) => {
 
 }
 
-export { uploadOnCloudinary, deleteFileOnCloudinary }
+export { uploadOnCloudinary, deleteFileOnCloudinary, cleanUpFiles }
