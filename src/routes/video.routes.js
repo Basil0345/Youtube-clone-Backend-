@@ -18,7 +18,7 @@ router
     .route("/")
     .get(getAllVideos)
     .post(
-        upload.fields([
+        upload.fields( [
             {
                 name: "videoFile",
                 maxCount: 1,
