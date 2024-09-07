@@ -140,7 +140,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
         new ApiResponse(200, null, "Video deleted successfully")
     );
 
-})
+})//TODO: handle watch history
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
@@ -171,15 +171,47 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 })
 
+const togglePublishStatus = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+    const userId = req.user._id;
+
+    //check if its valid video Id
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    // Find the video by ID
+    const video = await Video.findById(videoId);
+
+    // Handle case where video is not found
+    if (!video) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    // Check if the user is authorized to update the video
+    if (video.owner.toString() !== userId.toString()) {
+        throw new ApiError(403, "You are not authorized to update this video");
+    }
+
+    // Toggle the publish status
+    video.isPublished = !video.isPublished
+
+    // Save the updated video
+    await video.save()
+
+    // Respond with the updated video details
+    return res.status(200).json(
+        new ApiResponse(200, video, "Publish status updated successfully")
+    );
+})
+
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
 })
 
 
-const togglePublishStatus = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-})
+
 
 export {
     getAllVideos,
