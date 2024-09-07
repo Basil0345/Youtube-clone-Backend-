@@ -156,6 +156,14 @@ const getVideoById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Video not Found");
     }
 
+    //get the user to add watch history
+    const user = await User.findById(req.user._id);
+
+    if (!user.watchHistory.includes(videoId)) {
+        user.watchHistory.push(videoId); // Add video to watch history
+        await user.save(); // Save the updated user document
+    }
+
     // Respond with success message
     return res.status(200).json(
         new ApiResponse(200, video, "Video Fetched successfully")
