@@ -117,7 +117,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
     const userID = req.user._id;
 
-
+    //get the video
     const video = await Video.findById(videoId);
 
     if (!video) {
@@ -142,15 +142,32 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 })
 
+const getVideoById = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
+
+    //get the video
+    const video = await Video.findById(videoId);
+
+    if (!video) {
+        throw new ApiError(404, "Video not Found");
+    }
+
+    // Respond with success message
+    return res.status(200).json(
+        new ApiResponse(200, video, "Video Fetched successfully")
+    );
+
+})
+
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
 })
 
-const getVideoById = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    //TODO: get video by id
-})
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
