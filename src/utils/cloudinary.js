@@ -41,18 +41,21 @@ const deleteFileOnCloudinary = async (fileUrl) => {
         // Extract public ID from the Cloudinary URL
         let publicId = fileUrl?.split("/")?.pop()?.split(".")[0]
 
+        // Determine the resource type based on the file type
+        const isVideo = fileUrl.includes("/video/");
+
         if (!publicId) {
             return null;
         }
 
         // Delete the image
-        let result = await cloudinary.uploader.destroy(publicId)
-        console.log('Image deleted successfully:', result);
+        await cloudinary.uploader.destroy(publicId, {
+            resource_type: isVideo ? "video" : "image" // Set resource_type based on whether it's a video or image
+        })
     }
     catch (error) {
         console.error('Error deleting image:', error.message);
     }
-
 }
 
 export { uploadOnCloudinary, deleteFileOnCloudinary, cleanUpFiles }

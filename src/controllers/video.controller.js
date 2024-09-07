@@ -29,7 +29,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
     const video = await Video.create({
         title,
-        description: description ? description : "",
+        description: description ? description : " ",
         videoFile: videoFile.url,
         thumbnail: thumbnail.url,
         duration: videoFile.duration,
@@ -45,7 +45,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
     )
 
 });
-
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
@@ -110,7 +109,38 @@ const updateVideo = asyncHandler(async (req, res) => {
     );
 });
 
+const deleteVideo = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid video ID")
+    }
 
+    const userID = req.user._id;
+
+
+    const video = await Video.findById(videoId);
+
+    if (!video) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    if (video.owner.toString() !== userID.toString()) {
+        throw new ApiError(403, "You are not authorized to update this video");
+    }
+
+    // Delete video thumbnail & video from Cloudinary
+    await deleteFileOnCloudinary(video.thumbnail);
+    await deleteFileOnCloudinary(video.videoFile);
+
+    // Delete the video document from the database
+    await video.deleteOne();
+
+    // Respond with success message
+    return res.status(200).json(
+        new ApiResponse(200, null, "Video deleted successfully")
+    );
+
+})
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
@@ -120,13 +150,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: get video by id
-})
-
-
-
-const deleteVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    //TODO: delete video
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
